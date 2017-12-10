@@ -18,7 +18,7 @@ enum BehaviorType { SEEK, FLEE, ARRIVAL, DEPARTURE, AVOID, WANDER, ALIGNMENT, SE
 #define POS  0
 #define ORI  1
 #define VEL  2
-#define AVEL 3
+#define AVEL 3 
 #define _X  0
 #define _Y  1
 #define _Z  2
@@ -134,7 +134,7 @@ protected:
 
 	vec3 m_torque;
 	// m_torque[0] = body torque about the x axis (for 2D planar case = 0.0)
-	// m_torque[1] = body torque about the y axis 
+	// m_torque[1] = body torque about the y axis
 	// m_torque[2] = body torque about the z axis (for 2D planar case = 0.0)
 
 	int m_controlDim = 2;

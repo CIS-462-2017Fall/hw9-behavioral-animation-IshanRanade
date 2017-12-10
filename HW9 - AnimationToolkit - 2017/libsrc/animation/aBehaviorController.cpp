@@ -162,9 +162,24 @@ void BehaviorController::control(double deltaT)
 
 		// TODO: insert your code here to compute m_force and m_torque
 
+		vec3 v = m_Vdesired;
+		m_vd = m_Vdesired.Length();
+		v.Normalize();
 
+		vec3 w = m_Vel0.Normalize();
+		float dot = acos(Dot(v, w));
 
+		vec3 theta = vec3(0, dot, 0);
 
+		ClampAngle(theta[0]);
+		ClampAngle(theta[1]);
+		ClampAngle(theta[2]);
+
+		gOriKv = 32;
+		gOriKp = 256;
+
+		m_force = gMass * gOriKv * (m_Vdesired - m_Vel0);
+		m_torque = gInertia * (-gOriKv * m_stateDot[1] + gOriKp * theta);
 
 
 
@@ -211,10 +226,10 @@ void BehaviorController::computeDynamics(vector<vec3>& state, vector<vec3>& cont
 
 	// Compute the stateDot vector given the values of the current state vector and control input vector
 	// TODO: add your code here
-
-
-
-
+	stateDot[0] = state[2];
+	stateDot[1] = state[3];
+	stateDot[2] = force / gMass;
+	stateDot[3] = torque / gInertia;
 
 }
 
@@ -224,12 +239,27 @@ void BehaviorController::updateState(float deltaT, int integratorType)
 	//  this should be similar to what you implemented in the particle system assignment
 
 	// TODO: add your code here
-	
+	computeDynamics(m_state, m_controlInput, m_stateDot, deltaT);
+	switch (integratorType)
+	{
+	case 0:
 
+		m_state[0] = m_state[0] + m_stateDot[0] * deltaT;
+		m_state[1] = m_state[1] + m_stateDot[1] * deltaT;
+		m_state[2] = m_state[2] + m_stateDot[2] * deltaT;
+		m_state[3] = m_state[3] + m_stateDot[3] * deltaT;
 
+		break;
 
+	case 1:
 
+		m_state[0] = m_state[0] + m_stateDot[0] * deltaT;
+		m_state[1] = m_state[1] + m_stateDot[1] * deltaT;
+		m_state[2] = m_state[2] + m_stateDot[2] * deltaT;
+		m_state[3] = m_state[3] + m_stateDot[3] * deltaT;
 
+		break;
+	}
 
 
 	//  given the new values in m_state, these are the new component state values 
@@ -240,12 +270,25 @@ void BehaviorController::updateState(float deltaT, int integratorType)
 
 	//  Perform validation check to make sure all values are within MAX values
 	// TODO: add your code here
+	double speed = min(gMaxSpeed, m_VelB.Length());
 
+	m_Vel0[0] = speed * cos(m_Euler[1]);
+	m_Vel0[1] = 0;
+	m_Vel0[2] = speed * sin(m_Euler[1]);
 
+	/*
+	m_Vel0[0] = min(gMaxSpeed, abs(m_Vel0[0])) * (m_Vel0[0] / abs(m_Vel0[0]));
+	m_Vel0[1] = min(gMaxSpeed, abs(m_Vel0[1])) * (m_Vel0[1] / abs(m_Vel0[1]));
+	m_Vel0[2] = min(gMaxSpeed, abs(m_Vel0[2])) * (m_Vel0[2] / abs(m_Vel0[2]));
 
+	m_force[0] = min(gMaxForce, abs(m_force[0])) * (m_force[0] / abs(m_force[0]));
+	m_force[1] = min(gMaxForce, abs(m_force[1])) * (m_force[1] / abs(m_force[1]));
+	m_force[2] = min(gMaxForce, abs(m_force[2])) * (m_force[2] / abs(m_force[2]));
 
-
-
+	m_torque[0] = min(gMaxTorque, abs(m_torque[0])) * (m_torque[0] / abs(m_torque[0]));
+	m_torque[1] = min(gMaxTorque, abs(m_torque[1])) * (m_torque[1] / abs(m_torque[1]));
+	m_torque[2] = min(gMaxTorque, abs(m_torque[2])) * (m_torque[2] / abs(m_torque[2]));
+	*/
 
 
 	// update the guide orientation
