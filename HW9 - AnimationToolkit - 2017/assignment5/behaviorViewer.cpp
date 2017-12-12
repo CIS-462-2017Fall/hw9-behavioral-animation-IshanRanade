@@ -84,6 +84,10 @@ void BehaviorViewer::initializeGui()
 	TwAddButton(m_TwBehaviorBar, "Reset", onResetCb, this, "");
 
 	//TODO: Add your code here to create additional GUI Variables
+	TwAddVarRW(m_TwBehaviorBar, "K-separation", TW_TYPE_DOUBLE, &BehaviorController::KSeparation, "");
+	TwAddVarRW(m_TwBehaviorBar, "K-alignment", TW_TYPE_DOUBLE, &BehaviorController::KAlignment, "");
+	TwAddVarRW(m_TwBehaviorBar, "K-cohesion", TW_TYPE_DOUBLE, &BehaviorController::KCohesion, "");
+	TwAddVarRW(m_TwBehaviorBar, "K-arrival", TW_TYPE_DOUBLE, &BehaviorController::KArrival, "");
 }
 
 
