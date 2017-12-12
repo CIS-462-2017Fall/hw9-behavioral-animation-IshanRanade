@@ -161,31 +161,21 @@ void BehaviorController::control(double deltaT)
 		//  where the values of the gains Kv and Kp are different for each controller
 
 		// TODO: insert your code here to compute m_force and m_torque
+		m_force = gMass * 12.0 * (m_Vdesired - m_state[VEL]);
+		m_thetad = atan2(m_Vdesired[2], m_Vdesired[0]);
 
-		vec3 v = m_Vdesired;
+		double Kv = 32;
+		double Kp = 256;
+
+		double thetaDifference = m_thetad - m_state[ORI][_Y];
+		ClampAngle(thetaDifference);
+
+		m_torque = vec3(0, gInertia * ((-Kv * m_state[AVEL][_Y]) + (Kp * thetaDifference)), 0);
+
+		m_force = m_force.Normalize() * min(gMaxForce, m_force.Length());
+		m_torque = m_torque.Normalize() * min(gMaxTorque, m_torque.Length());
+
 		m_vd = m_Vdesired.Length();
-		v.Normalize();
-
-		vec3 w = m_Vel0.Normalize();
-		float dot = acos(Dot(v, w));
-
-		vec3 theta = vec3(0, dot, 0);
-
-		ClampAngle(theta[0]);
-		ClampAngle(theta[1]);
-		ClampAngle(theta[2]);
-
-		gOriKv = 32;
-		gOriKp = 256;
-
-		m_force = gMass * gOriKv * (m_Vdesired - m_Vel0);
-		m_torque = gInertia * (-gOriKv * m_stateDot[1] + gOriKp * theta);
-
-
-
-
-
-
 
 
 
@@ -226,8 +216,8 @@ void BehaviorController::computeDynamics(vector<vec3>& state, vector<vec3>& cont
 
 	// Compute the stateDot vector given the values of the current state vector and control input vector
 	// TODO: add your code here
-	stateDot[0] = m_Guide.getLocal2Parent() * (m_VelB);
-	stateDot[1] = m_AVelB;
+	stateDot[0] = state[2];
+	stateDot[1] = state[3];
 	stateDot[2] = force / gMass;
 	stateDot[3] = torque / gInertia;
 
@@ -268,16 +258,28 @@ void BehaviorController::updateState(float deltaT, int integratorType)
 	m_VelB = m_state[VEL];
 	m_AVelB = m_state[AVEL];
 
+	
+
 	//  Perform validation check to make sure all values are within MAX values
 	// TODO: add your code here
 	//m_Vel0 = m_stateDot[0];
+	m_Vel0 = m_state[VEL];
 
-	
+	if (m_Vel0.Length() > gMaxSpeed) {
+		m_Vel0 = gMaxSpeed * m_Vel0.Normalize();
+	}
+
+	if (m_AVelB.Length() > gMaxAngularSpeed) {
+		m_AVelB = gMaxSpeed * m_AVelB.Normalize();
+	}
+
+	/*
 	double speed = min(gMaxSpeed, m_VelB.Length());
 
 	m_Vel0[0] = speed * cos(m_Euler[1]);
 	m_Vel0[1] = 0;
 	m_Vel0[2] = speed * sin(m_Euler[1]);
+	*/
 	
 
 	/*
@@ -285,6 +287,7 @@ void BehaviorController::updateState(float deltaT, int integratorType)
 	m_Vel0[1] = min(gMaxSpeed, abs(m_Vel0[1])) * (m_Vel0[1] / abs(m_Vel0[1]));
 	m_Vel0[2] = min(gMaxSpeed, abs(m_Vel0[2])) * (m_Vel0[2] / abs(m_Vel0[2]));
 	*/
+	/*
 	m_force[0] = min(gMaxForce, abs(m_force[0])) * (m_force[0] / abs(m_force[0]));
 	m_force[1] = min(gMaxForce, abs(m_force[1])) * (m_force[1] / abs(m_force[1]));
 	m_force[2] = min(gMaxForce, abs(m_force[2])) * (m_force[2] / abs(m_force[2]));
@@ -292,6 +295,7 @@ void BehaviorController::updateState(float deltaT, int integratorType)
 	m_torque[0] = min(gMaxTorque, abs(m_torque[0])) * (m_torque[0] / abs(m_torque[0]));
 	m_torque[1] = min(gMaxTorque, abs(m_torque[1])) * (m_torque[1] / abs(m_torque[1]));
 	m_torque[2] = min(gMaxTorque, abs(m_torque[2])) * (m_torque[2] / abs(m_torque[2]));
+	*/
 	
 
 
