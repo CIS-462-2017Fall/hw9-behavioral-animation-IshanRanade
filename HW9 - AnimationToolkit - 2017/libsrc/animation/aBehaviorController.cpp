@@ -226,8 +226,8 @@ void BehaviorController::computeDynamics(vector<vec3>& state, vector<vec3>& cont
 
 	// Compute the stateDot vector given the values of the current state vector and control input vector
 	// TODO: add your code here
-	stateDot[0] = state[2];
-	stateDot[1] = state[3];
+	stateDot[0] = m_Guide.getLocal2Parent() * (m_VelB);
+	stateDot[1] = m_AVelB;
 	stateDot[2] = force / gMass;
 	stateDot[3] = torque / gInertia;
 
@@ -239,7 +239,7 @@ void BehaviorController::updateState(float deltaT, int integratorType)
 	//  this should be similar to what you implemented in the particle system assignment
 
 	// TODO: add your code here
-	computeDynamics(m_state, m_controlInput, m_stateDot, deltaT);
+	//computeDynamics(m_state, m_controlInput, m_stateDot, deltaT);
 	switch (integratorType)
 	{
 	case 0:
@@ -270,17 +270,21 @@ void BehaviorController::updateState(float deltaT, int integratorType)
 
 	//  Perform validation check to make sure all values are within MAX values
 	// TODO: add your code here
+	//m_Vel0 = m_stateDot[0];
+
+	
 	double speed = min(gMaxSpeed, m_VelB.Length());
 
 	m_Vel0[0] = speed * cos(m_Euler[1]);
 	m_Vel0[1] = 0;
 	m_Vel0[2] = speed * sin(m_Euler[1]);
+	
 
 	/*
 	m_Vel0[0] = min(gMaxSpeed, abs(m_Vel0[0])) * (m_Vel0[0] / abs(m_Vel0[0]));
 	m_Vel0[1] = min(gMaxSpeed, abs(m_Vel0[1])) * (m_Vel0[1] / abs(m_Vel0[1]));
 	m_Vel0[2] = min(gMaxSpeed, abs(m_Vel0[2])) * (m_Vel0[2] / abs(m_Vel0[2]));
-
+	*/
 	m_force[0] = min(gMaxForce, abs(m_force[0])) * (m_force[0] / abs(m_force[0]));
 	m_force[1] = min(gMaxForce, abs(m_force[1])) * (m_force[1] / abs(m_force[1]));
 	m_force[2] = min(gMaxForce, abs(m_force[2])) * (m_force[2] / abs(m_force[2]));
@@ -288,7 +292,7 @@ void BehaviorController::updateState(float deltaT, int integratorType)
 	m_torque[0] = min(gMaxTorque, abs(m_torque[0])) * (m_torque[0] / abs(m_torque[0]));
 	m_torque[1] = min(gMaxTorque, abs(m_torque[1])) * (m_torque[1] / abs(m_torque[1]));
 	m_torque[2] = min(gMaxTorque, abs(m_torque[2])) * (m_torque[2] / abs(m_torque[2]));
-	*/
+	
 
 
 	// update the guide orientation
